@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📒 手账待办 · 每日小记</title>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --paper: #FFFDF7;
+    --pink: #F8B4C8;
+    --pink-light: #FDE4EC;
+    --mint: #B8E8D0;
+    --mint-light: #DFF5E8;
+    --lavender: #D4C5F0;
+    --lavender-light: #EDE7F6;
+    --peach: #FFD4B8;
+    --peach-light: #FFF0E5;
+    --sky: #B5D8F7;
+    --sky-light: #E3F0FC;
+    --yellow: #FFF1B8;
+    --yellow-light: #FFFBE6;
+    --text: #5D4E37;
+    --text-light: #9B8E7B;
+    --text-dark: #3D3026;
+    --border: #E8DDD0;
+    --shadow: 0 4px 15px rgba(180, 160, 140, 0.12);
+    --shadow-lg: 0 8px 30px rgba(180, 160, 140, 0.18);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --tape-pink: #F8C4D0;
+    --tape-mint: #B8E0CC;
+    --tape-yellow: #FDE8A0;
+    --tape-lavender: #D8C8F0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'ZCOOL KuaiLe', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(248,180,200,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 85% 60%, rgba(184,232,208,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 80%, rgba(212,197,240,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 30% 50%, rgba(255,241,184,0.12) 0%, transparent 40%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    color: var(--text);
+  }
+
+  /* ===== 装饰背景 ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      /* 小星星散落 */
+      radial-gradient(circle 2px, rgba(248,180,200,0.5) 50%, transparent 50%) 5% 8% / 80px 80px,
+      radial-gradient(circle 3px, rgba(184,232,208,0.5) 50%, transparent 50%) 15% 25% / 100px 100px,
+      radial-gradient(circle 2px, rgba(212,197,240,0.5) 50%, transparent 50%) 85% 15% / 70px 70px,
+      radial-gradient(circle 3px, rgba(255,212,184,0.5) 50%, transparent 50%) 90% 40% / 90px 90px,
+      radial-gradient(circle 2px, rgba(181,216,247,0.5) 50%, transparent 50%) 25% 70% / 85px 85px,
+      radial-gradient(circle 3px, rgba(255,241,184,0.5) 50%, transparent 50%) 70% 75% / 75px 75px,
+      radial-gradient(circle 2px, rgba(248,180,200,0.4) 50%, transparent 50%) 50% 50% / 95px 95px,
+      /* 小花花 */
+      radial-gradient(circle 4px, rgba(248,180,200,0.3) 40%, transparent 50%) 12% 55% / 60px 60px;
+    background-repeat: repeat;
+  }
+
+  /* ===== 主容器 ===== */
+  .app-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ===== 封面卡片 ===== */
+  .cover-card {
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 28px 24px 20px;
+    position: relative;
+    overflow: visible;
+    border: 2px dashed var(--border);
+    text-align: center;
+  }
+
+  /* 回形针装饰 */
+  .cover-card::before {
+    content: '📎';
+    position: absolute;
+    top: -16px;
+    right: 24px;
+    font-size: 32px;
+    transform: rotate(15deg);
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+    z-index: 2;
+    animation: clipWiggle 4s ease-in-out infinite;
+  }
+
+  @keyframes clipWiggle {
+    0%, 100% { transform: rotate(15deg); }
+    50% { transform: rotate(20deg) translateY(-2px); }
+  }
+
+  /* 胶带装饰 */
+  .washi-tape {
+    position: absolute;
+    height: 28px;
+    border-radius: 2px;
+    opacity: 0.78;
+    transform: rotate(-2deg);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.06);
+    z-index: 1;
+  }
+  .washi-tape-1 { top: -12px; left: 30px; width: 80px; background: var(--tape-pink); transform: rotate(-3deg); }
+  .washi-tape-2 { top: -14px; right: 60px; width: 65px; background: var(--tape-mint); transform: rotate(2deg); }
+  .washi-tape-3 { bottom: -10px; left: 50%; width: 90px; background: var(--tape-yellow); transform: rotate(1deg) translateX(-50%); }
+  .washi-tape-4 { top: -14px; left: 50%; width: 55px; background: var(--tape-lavender); transform: rotate(-4deg) translateX(-60%); }
+
+  /* 格线装饰 */
+  .cover-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: var(--radius);
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      transparent,
+      transparent 25px,
+      rgba(200,190,175,0.10) 25px,
+      rgba(200,190,175,0.10) 26px
+    );
+    z-index: 0;
+  }
+
+  .cover-card > * { position: relative; z-index: 1; }
+
+  .cover-title {
+    font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+    font-size: 28px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+
+  .cover-subtitle {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+
+  .cover-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--pink-light);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 14px;
+    color: var(--text);
+    border: 1.5px dashed var(--pink);
+    margin-bottom: 14px;
+  }
+
+  .cover-weather {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .weather-emoji {
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 12px;
+    transition: all 0.25s;
+    background: transparent;
+    border: none;
+  }
+  .weather-emoji:hover {
+    background: var(--yellow-light);
+    transform: scale(1.2);
+  }
+  .weather-emoji.active {
+    background: var(--yellow);
+    transform: scale(1.15);
+  }
+
+  .cover-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+  .cover-stats span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-num {
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 18px;
+    font-family: 'ZCOOL KuaiLe', sans-serif;
+  }
+
+  /* ===== 输入卡片 ===== */
+  .input-card {
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    position: relative;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .task-input {
+    flex: 1;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+    outline: none;
+    transition: all 0.3s;
+  }
+  .task-input:focus {
+    border-color: var(--pink);
+    background: #FFFDFB;
+    box-shadow: 0 0 0 4px rgba(248,180,200,0.12);
+  }
+  .task-input::placeholder {
+    color: #C8BEB2;
+    font-style: italic;
+  }
+
+  .category-select {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s;
+    min-width: 80px;
+  }
+  .category-select:focus {
+    border-color: var(--mint);
+  }
+
+  .add-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--pink);
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 3px 10px rgba(248,180,200,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .add-btn:hover {
+    background: #F090A8;
+    transform: scale(1.08) rotate(90deg);
+    box-shadow: 0 5px 18px rgba(248,180,200,0.5);
+  }
+  .add-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* ===== 分类标签栏 ===== */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .filter-chip {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--paper);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--text-light);
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .filter-chip:hover {
+    border-color: var(--pink);
+    color: var(--text);
+  }
+  .filter-chip.active {
+    background: var(--pink-light);
+    border-color: var(--pink);
+    color: var(--text-dark);
+    font-weight: 600;
+  }
+
+  /* ===== 任务列表卡片 ===== */
+  .list-card {
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 20px 16px;
+    border: 2px dashed var(--border);
+    position: relative;
+    min-height: 200px;
+  }
+
+  /* 点点装饰 */
+  .list-card::before {
+    content: '•  •  •';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: 14px;
+    color: var(--pink);
+    opacity: 0.5;
+    background: var(--paper);
+    padding: 0 10px;
+  }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px dotted var(--border);
+  }
+
+  .list-title {
+    font-family: 'ZCOOL KuaiLe', sans-serif;
+    font-size: 18px;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .list-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .action-btn {
+    padding: 6px 12px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--paper);
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-light);
+    font-family: 'Noto Sans SC', sans-serif;
+    transition: all 0.25s;
+  }
+  .action-btn:hover {
+    background: var(--pink-light);
+    border-color: var(--pink);
+    color: var(--text);
+  }
+  .action-btn.danger:hover {
+    background: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #DC2626;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+  }
+  .empty-state .empty-emoji {
+    font-size: 60px;
+    display: block;
+    margin-bottom: 12px;
+    animation: float 3s ease-in-out infinite;
+  }
+  .empty-state p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* ===== 任务项 ===== */
+  .task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1.5px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    animation: slideIn 0.35s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .task-item:hover {
+    border-color: var(--border);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    transform: translateX(2px);
+  }
+
+  .task-item.completed {
+    opacity: 0.55;
+    background: #F5F2ED;
+  }
+  .task-item.completed .task-text {
+    text-decoration: line-through;
+    text-decoration-color: var(--pink);
+    text-decoration-thickness: 2px;
+  }
+
+  /* 自定义勾选框 */
+  .checkbox-wrap {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .checkbox-wrap input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .check-mark {
+    position: absolute;
+    top: 0; left: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2.5px solid var(--border);
+    transition: all 0.3s;
+    background: white;
+  }
+  .checkbox-wrap:hover .check-mark {
+    border-color: var(--pink);
+    transform: scale(1.1);
+  }
+  .checkbox-wrap input:checked + .check-mark {
+    background: var(--mint);
+    border-color: var(--mint);
+  }
+  .check-mark::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 7px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .checkbox-wrap input:checked + .check-mark::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .task-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-dark);
+    word-break: break-word;
+    transition: color 0.3s;
+  }
+
+  .task-category {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .cat-study { background: var(--lavender-light); color: #7C6BA0; }
+  .cat-work  { background: var(--sky-light); color: #5B8CB8; }
+  .cat-life  { background: var(--mint-light); color: #5B9E7A; }
+  .cat-fun   { background: var(--peach-light); color: #C8805A; }
+  .cat-other { background: var(--yellow-light); color: #A09040; }
+
+  .task-time {
+    font-size: 11px;
+    color: var(--text-light);
+    flex-shrink: 0;
+  }
+
+  .delete-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: #CCC;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .delete-btn:hover {
+    background: #FEE2E2;
+    color: #F87171;
+  }
+
+  /* ===== 底部装饰 ===== */
+  .footer-decor {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-light);
+    padding: 8px;
+    opacity: 0.6;
+  }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    background: var(--text-dark);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    z-index: 999;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 480px) {
+    .app-container { gap: 14px; padding: 0; }
+    .cover-card { padding: 22px 14px 16px; }
+    .cover-title { font-size: 24px; }
+    .input-row { flex-wrap: wrap; }
+    .category-select { flex: 1; }
+    .task-item { padding: 10px 12px; gap: 8px; }
+    .cover-stats { gap: 14px; }
+  }
+
+  /* 滚动条美化 */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #C8BEB2; }
+
+  /* 可爱的小贴纸 */
+  .sticker {
+    position: absolute;
+    font-size: 24px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.7;
+    animation: stickerFloat 6s ease-in-out infinite;
+  }
+  .sticker-1 { top: -18px; left: 8px; animation-delay: 0s; }
+  .sticker-2 { bottom: -16px; right: 10px; animation-delay: 2s; font-size: 20px; }
+  .sticker-3 { top: 20px; right: -10px; animation-delay: 4s; font-size: 18px; }
+
+  @keyframes stickerFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-4px) rotate(3deg); }
+    75% { transform: translateY(3px) rotate(-2deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ===== 封面卡片 ===== -->
+  <div class="cover-card">
+    <div class="washi-tape washi-tape-1"></div>
+    <div class="washi-tape washi-tape-2"></div>
+    <div class="washi-tape washi-tape-3"></div>
+    <div class="sticker sticker-1">🌟</div>
+    <div class="sticker sticker-2">💫</div>
+
+    <div class="cover-title">📒 每日手账</div>
+    <div class="cover-subtitle">今天也要元气满满哦 ✧(≖ ◡ ≖✿)</div>
+    <div class="cover-date" id="dateDisplay"></div>
+
+    <div class="cover-weather" id="weatherPicker">
+      <button class="weather-emoji" data-weather="☀️" title="晴">☀️</button>
+      <button class="weather-emoji" data-weather="⛅" title="多云">⛅</button>
+      <button class="weather-emoji" data-weather="☁️" title="阴">☁️</button>
+      <button class="weather-emoji" data-weather="🌧️" title="雨">🌧️</button>
+      <button class="weather-emoji" data-weather="🌈" title="彩虹">🌈</button>
+      <button class="weather-emoji" data-weather="⭐" title="星夜">⭐</button>
+    </div>
+
+    <div class="cover-stats">
+      <span>📋 全部 <span class="stat-num" id="statTotal">0</span></span>
+      <span>✅ 完成 <span class="stat-num" id="statDone">0</span></span>
+      <span>🎯 进行中 <span class="stat-num" id="statActive">0</span></span>
+    </div>
+  </div>
+
+  <!-- ===== 输入卡片 ===== -->
+  <div class="input-card">
+    <div class="input-row">
+      <input
+        type="text"
+        class="task-input"
+        id="taskInput"
+        placeholder="✏️ 写下一件要做的事..."
+        maxlength="100"
+        autocomplete="off"
+      >
+      <select class="category-select" id="categorySelect">
+        <option value="study">📚 学习</option>
+        <option value="work">💼 工作</option>
+        <option value="life" selected>🏠 生活</option>
+        <option value="fun">🎮 娱乐</option>
+        <option value="other">📌 其他</option>
+      </select>
+      <button class="add-btn" id="addBtn" title="添加任务">＋</button>
+    </div>
+  </div>
+
+  <!-- ===== 分类筛选 ===== -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-filter="all">🌸 全部</button>
+    <button class="filter-chip" data-filter="active">🎯 进行中</button>
+    <button class="filter-chip" data-filter="completed">✅ 已完成</button>
+    <button class="filter-chip" data-filter="study">📚 学习</button>
+    <button class="filter-chip" data-filter="work">💼 工作</button>
+    <button class="filter-chip" data-filter="life">🏠 生活</button>
+    <button class="filter-chip" data-filter="fun">🎮 娱乐</button>
+  </div>
+
+  <!-- ===== 任务列表 ===== -->
+  <div class="list-card">
+    <div class="list-header">
+      <div class="list-title" id="listTitle">📝 待办清单</div>
+      <div class="list-actions">
+        <button class="action-btn" id="clearDoneBtn">✨ 清除已完成</button>
+        <button class="action-btn danger" id="clearAllBtn">🗑️ 清空全部</button>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState">
+      <span class="empty-emoji">🐣</span>
+      <p>还没有待办事项哦～<br>快写下今天的第一条吧！</p>
+    </div>
+
+    <!-- 列表 -->
+    <ul class="task-list" id="taskList" style="display:none;"></ul>
+  </div>
+
+  <!-- 底部 -->
+  <div class="footer-decor">
+    ♡ 每一天都值得被温柔记录 ♡
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== 数据管理 ====================
+const STORAGE_KEY = 'notebook-todos';
+const WEATHER_KEY = 'notebook-weather';
+
+let todos = [];
+let currentFilter = 'all';
+let currentWeather = '';
+
+function loadTodos() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    todos = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    todos = [];
+  }
+}
+
+function saveTodos() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+}
+
+function loadWeather() {
+  currentWeather = localStorage.getItem(WEATHER_KEY) || '⛅';
+}
+
+function saveWeather() {
+  localStorage.setItem(WEATHER_KEY, currentWeather);
+}
+
+// ==================== 工具函数 ====================
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function getCategoryLabel(cat) {
+  const map = { study: '📚 学习', work: '💼 工作', life: '🏠 生活', fun: '🎮 娱乐', other: '📌 其他' };
+  return map[cat] || '📌 其他';
+}
+
+// ==================== 渲染 ====================
+function getFilteredTodos() {
+  if (currentFilter === 'all') return [...todos];
+  if (currentFilter === 'active') return todos.filter(t => !t.done);
+  if (currentFilter === 'completed') return todos.filter(t => t.done);
+  return todos.filter(t => t.category === currentFilter && !t.done);
+}
+
+function updateStats() {
+  const total = todos.length;
+  const done = todos.filter(t => t.done).length;
+  const active = total - done;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statActive').textContent = active;
+}
+
+function renderTaskList() {
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('emptyState');
+  const filtered = getFilteredTodos();
+
+  if (filtered.length === 0) {
+    list.style.display = 'none';
+    empty.style.display = 'block';
+    // 根据筛选换空状态文案
+    const emojis = {
+      all: '🐣', active: '🎉', completed: '😴',
+      study: '📚', work: '💼', life: '🏠', fun: '🎮'
+    };
+    const msgs = {
+      all: '还没有待办事项哦～<br>快写下今天的第一条吧！',
+      active: '太棒了！所有任务都完成啦 🎉',
+      completed: '还没有已完成的任务呢～',
+      study: '没有学习相关的待办～',
+      work: '没有工作相关的待办～',
+      life: '没有生活相关的待办～',
+      fun: '没有娱乐相关的待办～'
+    };
+    empty.querySelector('.empty-emoji').textContent = emojis[currentFilter] || '🐣';
+    empty.querySelector('p').innerHTML = msgs[currentFilter] || msgs.all;
+  } else {
+    list.style.display = 'flex';
+    empty.style.display = 'none';
+
+    list.innerHTML = filtered.map(t => `
+      <li class="task-item ${t.done ? 'completed' : ''}" data-id="${t.id}">
+        <label class="checkbox-wrap" title="${t.done ? '取消完成' : '标记完成'}">
+          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
+          <span class="check-mark"></span>
+        </label>
+        <span class="task-text">${escapeHtml(t.text)}</span>
+        <span class="task-category cat-${t.category}">${getCategoryLabel(t.category)}</span>
+        <span class="task-time">${formatTime(t.createdAt)}</span>
+        <button class="delete-btn" title="删除" onclick="deleteTask('${t.id}')">✕</button>
+      </li>
+    `).join('');
+  }
+
+  updateStats();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderWeather() {
+  document.querySelectorAll('.weather-emoji').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.weather === currentWeather);
+  });
+}
+
+function updateDate() {
+  const now = new Date();
+  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const w = weekDays[now.getDay()];
+  document.getElementById('dateDisplay').innerHTML =
+    `📅 ${y}年${m}月${d}日 星期${w} ${currentWeather}`;
+}
+
+// ==================== 操作 ====================
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const category = document.getElementById('categorySelect').value;
+  const text = input.value.trim();
+
+  if (!text) {
+    input.focus();
+    input.style.borderColor = '#FCA5A5';
+    setTimeout(() => { input.style.borderColor = ''; }, 600);
+    return;
+  }
+
+  todos.unshift({
+    id: genId(),
+    text,
+    category,
+    done: false,
+    createdAt: Date.now()
+  });
+
+  saveTodos();
+  input.value = '';
+  input.focus();
+  renderAll();
+  showToast('✨ 已添加到手账～');
+}
+
+function toggleTask(id) {
+  const todo = todos.find(t => t.id === id);
+  if (todo) {
+    todo.done = !todo.done;
+    saveTodos();
+    renderAll();
+    if (todo.done) {
+      showToast('🎉 又完成一项！好棒～');
+    }
+  }
+}
+
+function deleteTask(id) {
+  const idx = todos.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    const name = todos[idx].text;
+    todos.splice(idx, 1);
+    saveTodos();
+    renderAll();
+    showToast(`🗑️ 已删除「${name.slice(0, 12)}${name.length > 12 ? '...' : ''}」`);
+  }
+}
+
+function clearDone() {
+  const doneCount = todos.filter(t => t.done).length;
+  if (doneCount === 0) {
+    showToast('🤔 没有已完成的任务哦～');
+    return;
+  }
+  if (confirm(`确定要清除 ${doneCount} 条已完成的任务吗？`)) {
+    todos = todos.filter(t => !t.done);
+    saveTodos();
+    renderAll();
+    showToast(`✨ 清除了 ${doneCount} 条～手账更整洁啦！`);
+  }
+}
+
+function clearAll() {
+  if (todos.length === 0) {
+    showToast('🤔 手账已经是空的啦～');
+    return;
+  }
+  if (confirm(`确定要清空全部 ${todos.length} 条任务吗？此操作不可恢复哦！`)) {
+    todos = [];
+    saveTodos();
+    renderAll();
+    showToast('🗑️ 手账已清空～');
+  }
+}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.filter === filter)
+  );
+  // 更新列表标题
+  const titles = {
+    all: '📝 待办清单', active: '🎯 进行中', completed: '✅ 已完成',
+    study: '📚 学习待办', work: '💼 工作待办', life: '🏠 生活待办', fun: '🎮 娱乐待办'
+  };
+  document.getElementById('listTitle').textContent = titles[filter] || '📝 待办清单';
+  renderTaskList();
+}
+
+function setWeather(emoji) {
+  currentWeather = emoji;
+  saveWeather();
+  renderWeather();
+  updateDate();
+}
+
+function renderAll() {
+  updateDate();
+  renderTaskList();
+  renderWeather();
+}
+
+// ==================== Toast ====================
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 1800);
+}
+
+// ==================== 事件绑定 ====================
+document.getElementById('addBtn').addEventListener('click', addTask);
+document.getElementById('taskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+document.getElementById('weatherPicker').addEventListener('click', e => {
+  const btn = e.target.closest('.weather-emoji');
+  if (btn) setWeather(btn.dataset.weather);
+});
+
+document.getElementById('clearDoneBtn').addEventListener('click', clearDone);
+document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+
+document.getElementById('filterBar').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (chip) setFilter(chip.dataset.filter);
+});
+
+// ==================== 初始化 ====================
+function init() {
+  loadTodos();
+  loadWeather();
+  renderAll();
+}
+
+init();
+</script>
+
+</body>
+</html>
